@@ -60,7 +60,7 @@ func RedisMonitor(addr string, index int) {
 			//信号处理
 			l4g.Info("Signal: %s", sig.String())
 			return
-    default:
+		default:
 		}
 		if lr, lrerr := client.Cmd("LRANGE", "dbq", 0, MAX_LRANGE_INDEX).ListBytes(); lrerr == nil {
 			lrLen := len(lr)
