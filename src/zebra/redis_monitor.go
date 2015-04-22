@@ -69,7 +69,7 @@ func RedisMonitor(addr string, index int) {
 					count += MAX_SLEEP_INC_INTERVAL
 				}
 				time.Sleep(time.Duration(count) * time.Millisecond)
-				l4g.Debug("sleep %d", count)
+				//l4g.Debug("sleep %d", count)
 			} else {
 				count = 0
 				for _, info := range lr {
