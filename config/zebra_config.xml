@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+  <!--服务器ID，由数据中心分配 -->
+  <log>
+    <config>../config/zebra_log.xml</config>
+  </log>
+  <db>
+    <path>/home/sj/zebra/var/data</path>
+    <monitor_addr>127.0.0.1:6381</monitor_addr>
+    <monitor_index>9</monitor_index>
+    <listen_addr>0.0.0.0:9999</listen_addr>
+  </db>
+</config>

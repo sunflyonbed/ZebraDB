@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/M_00009/!svn/ver/20417/server/trunk/src/base/log4go/examples
+END
+FileLogWriter_Manual.go
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/M_00009/!svn/ver/46/server/trunk/src/base/log4go/examples/FileLogWriter_Manual.go
+END
+ConsoleLogWriter_Manual.go
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/M_00009/!svn/ver/46/server/trunk/src/base/log4go/examples/ConsoleLogWriter_Manual.go
+END
+SocketLogWriter_Manual.go
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/M_00009/!svn/ver/46/server/trunk/src/base/log4go/examples/SocketLogWriter_Manual.go
+END
+XMLConfigurationExample.go
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/M_00009/!svn/ver/20417/server/trunk/src/base/log4go/examples/XMLConfigurationExample.go
+END
+example.xml
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/M_00009/!svn/ver/46/server/trunk/src/base/log4go/examples/example.xml
+END
+SimpleNetLogServer.go
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/M_00009/!svn/ver/46/server/trunk/src/base/log4go/examples/SimpleNetLogServer.go
+END
