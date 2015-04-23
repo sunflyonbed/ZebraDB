@@ -9,12 +9,17 @@ _PERPLE="\033[0;35m"
 
 USER_NAME=`whoami`
 
+DB_DIR="/home/sj/ZebraDB"
+
+SVR="${DB_DIR}/bin/zebra"
+SVR_CFG="-config=${DB_DIR}/config/zebra_config.xml"
+
 svr_pids=()
 
 check_service_exist()
 {
   svr_pids=()
-  pid=`ps -ef | grep "$USER_NAME" | grep "./zebra -config=../config/zebra_config.xml" | grep -v grep | grep -v $0 | awk '{print $2}'`
+  pid=`ps -ef | grep "$USER_NAME" | grep "${SVR} ${SVR_CFG}" | grep -v grep | grep -v $0 | awk '{print $2}'`
   if [ "$pid" != "" ]
   then
     printf "${_GREEN}ZebraDB RUNNING${_NORMAL}\n"

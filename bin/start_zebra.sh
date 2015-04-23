@@ -9,12 +9,18 @@ _PERPLE="\033[0;35m"
 
 USER_NAME=`whoami`
 
+DB_DIR="/home/sj/ZebraDB"
+
+SVR="${DB_DIR}/bin/zebra"
+SVR_CFG="-config=${DB_DIR}/config/zebra_config.xml"
+SVR_LOG="${DB_DIR}/log/zebra_err.log"
+
 svr_pids=()
 
 check_service_exist()
 {
   svr_pids=()
-  pid=`ps -ef | grep "$USER_NAME" | grep "./zebra -config=../config/zebra_config.xml" | grep -v grep | grep -v $0 | awk '{print $2}'`
+  pid=`ps -ef | grep "$USER_NAME" | grep "${SVR} ${SVR_CFG}" | grep -v grep | grep -v $0 | awk '{print $2}'`
   if [ "$pid" != "" ]
   then
     printf "${_GREEN}ZebraDB RUNNING${_NORMAL}\n"
@@ -29,9 +35,9 @@ start_service()
   check_service_exist
   if [ ${#svr_pids["zebra"]} -lt 1 ]
   then
-    printf "\t${_YELLOW} executing \"./zebra -config=../config/zebra_config.xml ${_NORMAL}\t\t\n"
+    printf "\t${_YELLOW} executing \"${SVR} ${SVR_CFG} ${_NORMAL}\t\t\n"
     ## start server command
-    nohup ./zebra -config=../config/zebra_config.xml 1>> ../log/zebra_err.log 2>&1 & > /dev/null
+    nohup ${SVR} ${SVR_CFG} 1>> ${SVR_LOG} 2>&1 & > /dev/null
   fi
 
   sleep 1
