@@ -12,7 +12,7 @@ ZebraDB监听redis中的dbq队列, 获取dbq中数据(redis中hash和set部分�
 
 ZebraDB支持的Redis指令
 
-*HASH
+* HASH
 >HGETALL
 >HKEYS
 >HMGET
@@ -20,11 +20,11 @@ ZebraDB支持的Redis指令
 >HMSET
 >HDEL
 >DEL
-*SET
+* SET
 >SMEMBERS
 >SADD
 >SREM
-*SORTEDSET
+* SORTEDSET
 >ZRANGE
 >ZADD
 >ZREM
