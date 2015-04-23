@@ -9,25 +9,31 @@ import (
 	"levigo"
 )
 
+//LIKE REDIS READ CMD
 var (
 	//HASH CMD
-	REDIS_OP_HSET    = []byte("HSET")
-	REDIS_OP_HMSET   = []byte("HMSET")
-	REDIS_OP_HDEL    = []byte("HDEL")
-	REDIS_OP_DEL     = []byte("DEL") //ONLY DELETE HASH
 	REDIS_OP_HGETALL = []byte("HGETALL")
 	REDIS_OP_HKEYS   = []byte("HKEYS")
 	REDIS_OP_HMGET   = []byte("HMGET")
-
 	//SET CMD
-	REDIS_OP_SADD     = []byte("SADD")
-	REDIS_OP_SREM     = []byte("SREM")
 	REDIS_OP_SMEMBERS = []byte("SMEMBERS")
-
 	//SORTEDSET CMD
-	REDIS_OP_ZADD   = []byte("ZADD")
-	REDIS_OP_ZREM   = []byte("ZREM")
 	REDIS_OP_ZRANGE = []byte("ZRANGE")
+)
+
+//LIKE REDIS WRITE CMD
+var (
+	//HASH CMD
+	REDIS_OP_HSET  = []byte("HSET")
+	REDIS_OP_HMSET = []byte("HMSET")
+	REDIS_OP_HDEL  = []byte("HDEL")
+	REDIS_OP_DEL   = []byte("DEL") //ONLY DELETE HASH
+	//SET CMD
+	REDIS_OP_SADD = []byte("SADD")
+	REDIS_OP_SREM = []byte("SREM")
+	//SORTEDSET CMD
+	REDIS_OP_ZADD = []byte("ZADD")
+	REDIS_OP_ZREM = []byte("ZREM")
 )
 
 var (
