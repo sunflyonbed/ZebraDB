@@ -275,3 +275,15 @@ func Parse(reader *bytes.Buffer) *Reply {
 	}
 	return r
 }
+
+type Requests struct {
+	pending []*request
+}
+
+func (this *Requests) Append(cmd string, args ...interface{}) {
+	this.pending = append(this.pending, &request{cmd, args})
+}
+
+func (c *Client) SetPending(rs *Requests) {
+	c.pending = rs.pending
+}

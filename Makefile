@@ -1,11 +1,12 @@
-GOPATH = $(PWD)
-
 all:
-	cd bin && CGO_CFLAGS="-I$(GOPATH)/deps/include" CGO_LDFLAGS="-L$(GOPATH)/deps/libs" go build -gcflags "-N -l" zebra
+	cd bin && GOPATH=$(PWD) CGO_CFLAGS="-I$(PWD)/deps/include" CGO_LDFLAGS="-L$(PWD)/deps/libs" go build -gcflags "-N -l" zebra
 
 release:
-	cd bin && CGO_CFLAGS="-I$(GOPATH)/deps/include" CGO_LDFLAGS="-L$(GOPATH)/deps/libs" go build -ldflags "-w -s" zebra
+	cd bin && GOPATH=$(PWD) CGO_CFLAGS="-I$(PWD)/deps/include" CGO_LDFLAGS="-L$(PWD)/deps/libs" go build -ldflags "-w -s" zebra
 
-tools:
-	cd bin && CGO_CFLAGS="-I$(GOPATH)/deps/include" CGO_LDFLAGS="-L$(GOPATH)/deps/libs" go build -ldflags "-w -s" tools
+redisprotocol:
+	cd bin && GOPATH=$(PWD) CGO_CFLAGS="-I$(PWD)/deps/include" CGO_LDFLAGS="-L$(PWD)/deps/libs" go build -ldflags "-w -s" tools/redisprotocol
+
+restore:
+	cd bin && GOPATH=$(PWD) CGO_CFLAGS="-I$(PWD)/deps/include" CGO_LDFLAGS="-L$(PWD)/deps/libs" go build -ldflags "-w -s" tools/restore
 
