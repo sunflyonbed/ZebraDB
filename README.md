@@ -1,14 +1,14 @@
-ZebraDB监听redis中的dbq队列, 获取dbq中数据(redis中hash和set部分写入指令的协议)并将其翻译为LevelDB格式保存
+ZebraDB监听redis中的dbq队列, 获取dbq中数据(redis部分写入指令的协议)并将其翻译为LevelDB格式保存
 
-* Install: (dir-ZebraDB)
->1. make && make tools
+* Install: (directory: ZebraDB)
+>1. ./all.bash
 >2. mkdir log var
 * Run: (dir-bin)
->./start_zebra.sh
-* Stop: (dir-bin)
+>./start_zebra.sh (默认redis已启动)
+* Stop: (directory: bin)
 >./stop_zebra.sh
-* Test: (dir-bin)
->./tools -i="HSET T a 1" | redis-cli -p 6381 -n 0 --pipe
+* Test: (directory: bin)
+>./redisprotocol -i="HSET T a 1" | redis-cli -p 6381 -n 0 --pipe
 
 ZebraDB支持的Redis指令
 
