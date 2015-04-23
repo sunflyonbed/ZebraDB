@@ -2,10 +2,10 @@
 <config>
   <!--服务器ID，由数据中心分配 -->
   <log>
-    <config>/home/sj/ZebraDB/config/zebra_log.xml</config>
+    <config>ZebraDB_PATH/config/zebra_log.xml</config>
   </log>
   <db>
-    <path>/home/sj/ZebraDB/var/</path>
+    <path>ZebraDB_PATH/var/</path>
     <monitor_addr>127.0.0.1:6381</monitor_addr>
     <monitor_index>0</monitor_index>
     <listen_addr>0.0.0.0:9999</listen_addr>

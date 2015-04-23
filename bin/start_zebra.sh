@@ -9,7 +9,7 @@ _PERPLE="\033[0;35m"
 
 USER_NAME=`whoami`
 
-DB_DIR="/home/sj/ZebraDB"
+DB_DIR="ZebraDB_PATH"
 
 SVR="${DB_DIR}/bin/zebra"
 SVR_CFG="-config=${DB_DIR}/config/zebra_config.xml"
