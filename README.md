@@ -3,7 +3,7 @@ ZebraDB监听redis中的dbq队列, 获取dbq中数据(redis部分写入指令的
 * Install: (directory: ZebraDB)
 >1. ./all.bash
 >2. mkdir log var
-* Run: (dir-bin)
+* Run: (directory: bin)
 >./start_zebra.sh (默认redis已启动)
 * Stop: (directory: bin)
 >./stop_zebra.sh
