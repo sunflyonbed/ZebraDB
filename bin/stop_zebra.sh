@@ -14,13 +14,13 @@ svr_pids=()
 check_service_exist()
 {
   svr_pids=()
-  pid=`ps -ef | grep "$USER_NAME" | grep "./zebra" | grep -v grep | grep -v $0 | awk '{print $2}'`
+  pid=`ps -ef | grep "$USER_NAME" | grep "./zebra -config=../config/zebra_config.xml" | grep -v grep | grep -v $0 | awk '{print $2}'`
   if [ "$pid" != "" ]
   then
-    printf "${_GREEN}HLOG RUNNING${_NORMAL}\n"
+    printf "${_GREEN}ZebraDB RUNNING${_NORMAL}\n"
     svr_pids["zebra"]=$pid
   else
-    printf "${_RED}HLOG STOP${_NORMAL}\n"
+    printf "${_RED}ZebraDB STOP${_NORMAL}\n"
   fi
 }
 
@@ -29,7 +29,7 @@ kill_service()
   check_service_exist
   if [ ${#svr_pids["zebra"]} -gt 0 ]
   then
-    printf "\t${_YELLOW}killing zebra server${_CYAN}${_YELLOW}with pid=${svr_pids["zebra"]}...${_NORMAL}\t\t"
+    printf "\t${_YELLOW}killing ZebraDB server ${_CYAN}${_YELLOW}with pid=${svr_pids["zebra"]}...${_NORMAL}\t\t"
     kill ${svr_pids["zebra"]} || exit 0
     printf "\t[${_RED} KILLED${_NORMAL}]\n"
   fi

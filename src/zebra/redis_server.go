@@ -80,6 +80,12 @@ func RedisProcess(rw *net.TCPConn) {
 			} else {
 				e = client.WriteRespone(gDB.SMembers(data[1]))
 			}
+		} else if bytes.Equal(CMD, REDIS_OP_ZRANGE) { //SORTEDSET
+			if dl < 2 {
+				e = client.WriteRespone("param no enough")
+			} else {
+				e = client.WriteRespone(gDB.ZRange(data[1]))
+			}
 		} else if bytes.Equal(CMD, CMD_OP_SELECT) { //CMD
 			e = client.WriteRespone("ok")
 		} else if bytes.Equal(CMD, CMD_OP_INFO) {

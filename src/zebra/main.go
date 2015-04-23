@@ -33,5 +33,6 @@ func main() {
 	}
 	defer gDB.Close()
 	go RedisServer(gConf.DB.ListenAddr)
+	l4g.Info("monitor redis info: %s %d", gConf.DB.MonitorAddr, gConf.DB.MonitorIndex)
 	RedisMonitor(gConf.DB.MonitorAddr, gConf.DB.MonitorIndex)
 }

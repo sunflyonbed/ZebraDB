@@ -14,13 +14,13 @@ svr_pids=()
 check_service_exist()
 {
   svr_pids=()
-  pid=`ps -ef | grep "$USER_NAME" | grep "./zebra" | grep -v grep | grep -v $0 | awk '{print $2}'`
+  pid=`ps -ef | grep "$USER_NAME" | grep "./zebra -config=../config/zebra_config.xml" | grep -v grep | grep -v $0 | awk '{print $2}'`
   if [ "$pid" != "" ]
   then
-    printf "${_GREEN}HLOG RUNNING${_NORMAL}\n"
+    printf "${_GREEN}ZebraDB RUNNING${_NORMAL}\n"
     svr_pids["zebra"]=$pid
   else
-    printf "${_RED}HLOG STOP${_NORMAL}\n"
+    printf "${_RED}ZebraDB STOP${_NORMAL}\n"
   fi
 }
 
@@ -29,9 +29,9 @@ start_service()
   check_service_exist
   if [ ${#svr_pids["zebra"]} -lt 1 ]
   then
-    printf "\t${_YELLOW} executing \"./zebra ${_NORMAL}\t\t\n"
+    printf "\t${_YELLOW} executing \"./zebra -config=../config/zebra_config.xml ${_NORMAL}\t\t\n"
     ## start server command
-    nohup ./zebra 1>> zebra_err.log 2>&1 & > /dev/null
+    nohup ./zebra -config=../config/zebra_config.xml 1>> ../log/zebra_err.log 2>&1 & > /dev/null
   fi
 
   sleep 1
@@ -39,7 +39,7 @@ start_service()
   check_service_exist
   if [ ${#svr_pids["zebra"]} -lt 1 ]
   then
-    printf "${_YELLOW} zebra server start fail${_RED}\n"
+    printf "${_YELLOW} ZebraDB server start fail${_RED}\n"
   fi
 }
 

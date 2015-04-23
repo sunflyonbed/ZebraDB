@@ -10,11 +10,6 @@ import (
 )
 
 var (
-	//SET CMD
-	REDIS_OP_SADD     = []byte("SADD")
-	REDIS_OP_SREM     = []byte("SREM")
-	REDIS_OP_SMEMBERS = []byte("SMEMBERS")
-
 	//HASH CMD
 	REDIS_OP_HSET    = []byte("HSET")
 	REDIS_OP_HMSET   = []byte("HMSET")
@@ -23,6 +18,16 @@ var (
 	REDIS_OP_HGETALL = []byte("HGETALL")
 	REDIS_OP_HKEYS   = []byte("HKEYS")
 	REDIS_OP_HMGET   = []byte("HMGET")
+
+	//SET CMD
+	REDIS_OP_SADD     = []byte("SADD")
+	REDIS_OP_SREM     = []byte("SREM")
+	REDIS_OP_SMEMBERS = []byte("SMEMBERS")
+
+	//SORTEDSET CMD
+	REDIS_OP_ZADD   = []byte("ZADD")
+	REDIS_OP_ZREM   = []byte("ZREM")
+	REDIS_OP_ZRANGE = []byte("ZRANGE")
 )
 
 var (
@@ -51,8 +56,21 @@ func encodeSetKey(name, key []byte) []byte {
 	return ret
 }
 
-func decodeKey(data []byte) (name, key []byte, ret bool) {
+func encodeSortedSetKey(name, key []byte) []byte {
+	ret := make([]byte, 1+1+len(name)+1+len(key))
+	ret[0] = 'z'
+	ret[1] = byte(len(name))
+	copy(ret[2:], name)
+	ret[2+len(name)] = '='
+	copy(ret[3+len(name):], key)
+	return ret
+}
+
+func decodeHashKey(data []byte) (name, key []byte, ret bool) {
 	if len(data) < 5 {
+		return nil, nil, false
+	}
+	if data[0] != 'h' {
 		return nil, nil, false
 	}
 	nameLen := int(data[1])
@@ -62,6 +80,176 @@ func decodeKey(data []byte) (name, key []byte, ret bool) {
 	name = data[2 : 2+nameLen]
 	key = data[3+nameLen:]
 	return name, key, true
+}
+
+func decodeSetKey(data []byte) (name, key []byte, ret bool) {
+	if len(data) < 5 {
+		return nil, nil, false
+	}
+	if data[0] != 's' {
+		return nil, nil, false
+	}
+	nameLen := int(data[1])
+	if len(data)-4 < nameLen {
+		return nil, nil, false
+	}
+	name = data[2 : 2+nameLen]
+	key = data[3+nameLen:]
+	return name, key, true
+}
+
+func decodeSortedSetKey(data []byte) (name, key []byte, ret bool) {
+	if len(data) < 5 {
+		return nil, nil, false
+	}
+	if data[0] != 'z' {
+		return nil, nil, false
+	}
+	nameLen := int(data[1])
+	if len(data)-4 < nameLen {
+		return nil, nil, false
+	}
+	name = data[2 : 2+nameLen]
+	key = data[3+nameLen:]
+	return name, key, true
+}
+
+//HASH FUNCTION
+func (this *LevelDB) HSet(data [][]byte) bool {
+	if len(data) != 3 {
+		l4g.Error("hset len error: %d", len(data))
+		return false
+	}
+	err := this.Put(encodeHashKey(data[0], data[1]), data[2])
+	if err != nil {
+		l4g.Error("hset %s %s %s write error: %s", data[0], data[1], data[2], err.Error())
+		return false
+	}
+	return true
+}
+
+func (this *LevelDB) HMSet(data [][]byte) bool {
+	dl := len(data)
+	if dl < 3 {
+		l4g.Error("hmset len error: %d", dl)
+		return false
+	}
+	if dl/2 == 0 {
+		l4g.Error("hmset param error: %d", dl)
+		return false
+	}
+	pairs := (dl - 1) / 2
+
+	wb := levigo.NewWriteBatch()
+	for i := 0; i < pairs; i++ {
+		wb.Put(encodeHashKey(data[0], data[1+2*i]), data[2+2*i])
+	}
+	err := this.Write(wb)
+	wb.Close()
+
+	if err != nil {
+		l4g.Error("%s hmset write error: %s", data[0], err.Error())
+		return false
+	}
+	return true
+}
+
+func (this *LevelDB) HDel(data [][]byte) bool {
+	dl := len(data)
+	if dl < 2 {
+		if dl == 1 {
+			l4g.Error("hdel %s len error: %d", data[0], dl)
+		} else {
+			l4g.Error("hdel len error: %d", dl)
+		}
+		return false
+	}
+
+	wb := levigo.NewWriteBatch()
+	for i := 1; i < dl; i++ {
+		wb.Delete(encodeHashKey(data[0], data[i]))
+	}
+	err := this.Write(wb)
+	wb.Close()
+
+	if err != nil {
+		l4g.Error("%s hdel write error: %s", data[0], err.Error())
+		return false
+	}
+	return true
+}
+
+func (this *LevelDB) HClear(data [][]byte) bool {
+	for _, v := range data {
+		var tmp [][]byte
+		tmp = append(tmp, v)
+		tmp = append(tmp, this.HKeys(v)...)
+		this.HDel(tmp)
+	}
+	return true
+}
+
+func (this *LevelDB) HKeys(data []byte) (retList [][]byte) {
+	it := this.NewIterator()
+	defer it.Close()
+	start := encodeHashKey(data, []byte(nil))
+	for it.Seek(start); it.Valid(); it.Next() {
+		name, key, ret := decodeHashKey(it.Key())
+		if ret {
+			if string(name) == string(data) {
+				retList = append(retList, key)
+			} else {
+				break
+			}
+		} else {
+			break
+		}
+	}
+	if err := it.GetError(); err != nil {
+		l4g.Error("hgetall %s error: %s", data, err.Error())
+		retList = nil
+		retList = append(retList, []byte(err.Error()))
+	}
+	return
+}
+
+func (this *LevelDB) HGetAll(data []byte) (retList [][]byte) {
+	it := this.NewIterator()
+	defer it.Close()
+	start := encodeHashKey(data, []byte(nil))
+	for it.Seek(start); it.Valid(); it.Next() {
+		name, key, ret := decodeHashKey(it.Key())
+		if ret {
+			if string(name) == string(data) {
+				retList = append(retList, key)
+				retList = append(retList, it.Value())
+			} else {
+				break
+			}
+		} else {
+			break
+		}
+	}
+	if err := it.GetError(); err != nil {
+		l4g.Error("hgetall %s error: %s", data, err.Error())
+		retList = nil
+		retList = append(retList, []byte(err.Error()))
+	}
+	return
+}
+
+func (this *LevelDB) HMGet(data [][]byte) (retList [][]byte) {
+	for _, v := range data[1:] {
+		value, err := this.Get(encodeHashKey(data[0], v))
+		if err != nil {
+			retList = nil
+			retList = append(retList, []byte(err.Error()))
+			return
+		} else {
+			retList = append(retList, value)
+		}
+	}
+	return
 }
 
 //SET FUNCTION
@@ -112,7 +300,7 @@ func (this *LevelDB) SMembers(data []byte) (retList [][]byte) {
 	defer it.Close()
 	start := encodeSetKey(data, []byte(nil))
 	for it.Seek(start); it.Valid(); it.Next() {
-		name, key, ret := decodeKey(it.Key())
+		name, key, ret := decodeSetKey(it.Key())
 		if ret {
 			if string(name) == string(data) {
 				retList = append(retList, key)
@@ -131,105 +319,60 @@ func (this *LevelDB) SMembers(data []byte) (retList [][]byte) {
 	return
 }
 
-//HASH FUNCTION
-func (this *LevelDB) HSet(data [][]byte) bool {
-	if len(data) != 3 {
-		l4g.Error("hset len error: %d", len(data))
-		return false
-	}
-	err := this.Put(encodeHashKey(data[0], data[1]), data[2])
-	if err != nil {
-		l4g.Error("hset %s %s %s write error: %s", data[0], data[1], data[2], err.Error())
-		return false
-	}
-	return true
-}
-
-func (this *LevelDB) HMSet(data [][]byte) bool {
+//SORTEDSET FUNCTION
+func (this *LevelDB) ZAdd(data [][]byte) bool {
 	dl := len(data)
 	if dl < 3 {
-		l4g.Error("hmset len error: %d", dl)
+		l4g.Error("zadd len error: %d", dl)
 		return false
 	}
 	if dl/2 == 0 {
-		l4g.Error("hmset param error: %d", dl)
+		l4g.Error("zadd param error: %d", dl)
 		return false
 	}
 	pairs := (dl - 1) / 2
 
 	wb := levigo.NewWriteBatch()
 	for i := 0; i < pairs; i++ {
-		wb.Put(encodeHashKey(data[0], data[1+2*i]), data[2+2*i])
+		wb.Put(encodeSortedSetKey(data[0], data[2+2*i]), data[1+2*i])
 	}
 	err := this.Write(wb)
 	wb.Close()
 
 	if err != nil {
-		l4g.Error("%s hmset write error: %s", data[0], err.Error())
+		l4g.Error("%s zadd write error: %s", data[0], err.Error())
 		return false
 	}
 	return true
 }
 
-func (this *LevelDB) HDel(data [][]byte) bool {
+func (this *LevelDB) ZRem(data [][]byte) bool {
 	dl := len(data)
 	if dl < 2 {
-		l4g.Error("hdel len error: %d", dl)
+		l4g.Error("zrem len error: %d", dl)
 		return false
 	}
 
 	wb := levigo.NewWriteBatch()
 	for i := 1; i < dl; i++ {
-		wb.Delete(encodeHashKey(data[0], data[i]))
+		wb.Delete(encodeSortedSetKey(data[0], data[i]))
 	}
 	err := this.Write(wb)
 	wb.Close()
 
 	if err != nil {
-		l4g.Error("%s hdel write error: %s", data[0], err.Error())
+		l4g.Error("%s zrem write error: %s", data[0], err.Error())
 		return false
 	}
 	return true
 }
 
-func (this *LevelDB) HClear(data [][]byte) bool {
-	for _, v := range data {
-		this.HDel(this.HKeys(v))
-	}
-	return true
-}
-
-func (this *LevelDB) HKeys(data []byte) (retList [][]byte) {
-	retList = append(retList, data)
+func (this *LevelDB) ZRange(data []byte) (retList [][]byte) {
 	it := this.NewIterator()
 	defer it.Close()
-	start := encodeHashKey(data, []byte(nil))
+	start := encodeSortedSetKey(data, []byte(nil))
 	for it.Seek(start); it.Valid(); it.Next() {
-		name, key, ret := decodeKey(it.Key())
-		if ret {
-			if string(name) == string(data) {
-				retList = append(retList, key)
-			} else {
-				break
-			}
-		} else {
-			break
-		}
-	}
-	if err := it.GetError(); err != nil {
-		l4g.Error("hgetall %s error: %s", data, err.Error())
-		retList = nil
-		retList = append(retList, []byte(err.Error()))
-	}
-	return
-}
-
-func (this *LevelDB) HGetAll(data []byte) (retList [][]byte) {
-	it := this.NewIterator()
-	defer it.Close()
-	start := encodeHashKey(data, []byte(nil))
-	for it.Seek(start); it.Valid(); it.Next() {
-		name, key, ret := decodeKey(it.Key())
+		name, key, ret := decodeSortedSetKey(it.Key())
 		if ret {
 			if string(name) == string(data) {
 				retList = append(retList, key)
@@ -242,23 +385,9 @@ func (this *LevelDB) HGetAll(data []byte) (retList [][]byte) {
 		}
 	}
 	if err := it.GetError(); err != nil {
-		l4g.Error("hgetall %s error: %s", data, err.Error())
+		l4g.Error("zrange %s error: %s", data, err.Error())
 		retList = nil
 		retList = append(retList, []byte(err.Error()))
-	}
-	return
-}
-
-func (this *LevelDB) HMGet(data [][]byte) (retList [][]byte) {
-	for _, v := range data[1:] {
-		value, err := this.Get(encodeHashKey(data[0], v))
-		if err != nil {
-			retList = nil
-			retList = append(retList, []byte(err.Error()))
-			return
-		} else {
-			retList = append(retList, value)
-		}
 	}
 	return
 }

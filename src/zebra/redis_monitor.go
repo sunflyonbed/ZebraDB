@@ -59,32 +59,46 @@ func RedisMonitor(addr string, index int) {
 		case sig := <-sign:
 			//信号处理
 			l4g.Info("Signal: %s", sig.String())
+			WriteLevelDBInRange(client, &buff, -1, &opNum, &opStat)
+			l4g.Info("zebra stop...")
 			return
 		default:
 		}
-		if lr, lrerr := client.Cmd("LRANGE", "dbq", 0, MAX_LRANGE_INDEX).ListBytes(); lrerr == nil {
-			lrLen := len(lr)
-			if lrLen == 0 {
-				if count < MAX_SLEEP_TIME {
-					count += MAX_SLEEP_INC_INTERVAL
-				}
-				time.Sleep(time.Duration(count) * time.Millisecond)
-				//l4g.Debug("sleep %d", count)
-			} else {
-				count = 0
-				for _, info := range lr {
-					WriteLevelDB(&buff, info, &opNum, &opStat)
-				}
-				reply := client.Cmd("LTRIM", "dbq", lrLen, -1)
-				if reply.Err != nil {
-					l4g.Error("LTRIM dbq %d -1 error: %s", lrLen, reply.Err.Error())
-					return
-				}
-			}
-		} else {
-			l4g.Error("LRANGE dbq 0, %d error: %s", MAX_LRANGE_INDEX, lrerr.Error())
+		rLen, rErr := WriteLevelDBInRange(client, &buff, MAX_LRANGE_INDEX, &opNum, &opStat)
+		if rErr != nil {
 			return
+		} else if rLen == 0 {
+			if count < MAX_SLEEP_TIME {
+				count += MAX_SLEEP_INC_INTERVAL
+			}
+			time.Sleep(time.Duration(count) * time.Millisecond)
+			//l4g.Debug("sleep %d", count)
+		} else {
+			count = 0
 		}
+	}
+}
+
+func WriteLevelDBInRange(client *redis.Client, buff *bytes.Buffer, r int, opNum, opStat *uint64) (int, error) {
+	if lr, lrerr := client.Cmd("LRANGE", "dbq", 0, r).ListBytes(); lrerr == nil {
+		lrLen := len(lr)
+		if lrLen == 0 {
+			return 0, nil
+		} else {
+			for _, info := range lr {
+				WriteLevelDB(buff, info, opNum, opStat)
+			}
+			reply := client.Cmd("LTRIM", "dbq", lrLen, -1)
+			if reply.Err != nil {
+				l4g.Error("LTRIM dbq %d -1 error: %s", lrLen, reply.Err.Error())
+				return 0, reply.Err
+			} else {
+				return lrLen, nil
+			}
+		}
+	} else {
+		l4g.Error("LRANGE dbq 0, %d error: %s", r, lrerr.Error())
+		return 0, lrerr
 	}
 }
 
@@ -101,10 +115,6 @@ func WriteLevelDB(buff *bytes.Buffer, info []byte, opNum, opStat *uint64) {
 		ret := true
 		if len(infos) < 2 {
 			ret = false
-		} else if bytes.Equal(infos[0], REDIS_OP_SADD) {
-			ret = gDB.SAdd(infos[1:])
-		} else if bytes.Equal(infos[0], REDIS_OP_SREM) {
-			ret = gDB.SRem(infos[1:])
 		} else if bytes.Equal(infos[0], REDIS_OP_HSET) {
 			ret = gDB.HSet(infos[1:])
 		} else if bytes.Equal(infos[0], REDIS_OP_HMSET) {
@@ -113,6 +123,14 @@ func WriteLevelDB(buff *bytes.Buffer, info []byte, opNum, opStat *uint64) {
 			ret = gDB.HDel(infos[1:])
 		} else if bytes.Equal(infos[0], REDIS_OP_DEL) {
 			ret = gDB.HClear(infos[1:])
+		} else if bytes.Equal(infos[0], REDIS_OP_SADD) {
+			ret = gDB.SAdd(infos[1:])
+		} else if bytes.Equal(infos[0], REDIS_OP_SREM) {
+			ret = gDB.SRem(infos[1:])
+		} else if bytes.Equal(infos[0], REDIS_OP_ZADD) {
+			ret = gDB.ZAdd(infos[1:])
+		} else if bytes.Equal(infos[0], REDIS_OP_ZREM) {
+			ret = gDB.ZRem(infos[1:])
 		} else {
 			l4g.Error("no found cmd %s", infos[0])
 		}
