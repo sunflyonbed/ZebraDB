@@ -32,7 +32,7 @@ mkdir var log
 
 PWD=`pwd`
 
-sed -i "s/ZebraDB_PATH/${PWD}" bin/start_zebra.sh
-sed -i "s/ZebraDB_PATH/${PWD}" bin/stop_zebra.sh
-sed -i "s/ZebraDB_PATH/${PWD}" config/zebra_config.xml
-sed -i "s/ZebraDB_PATH/${PWD}" config/zebra_log.xml
+sed -i "s,ZebraDB_PATH,${PWD}," bin/start_zebra.sh
+sed -i "s,ZebraDB_PATH,${PWD}," bin/stop_zebra.sh
+sed -i "s,ZebraDB_PATH,${PWD}," config/zebra_config.xml
+sed -i "s,ZebraDB_PATH,${PWD}," config/zebra_log.xml
