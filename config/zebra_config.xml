@@ -4,10 +4,16 @@
   <log>
     <config>ZebraDB_PATH/config/zebra_log.xml</config>
   </log>
-  <db>
+  <server>
     <path>ZebraDB_PATH/var/</path>
     <monitor_addr>127.0.0.1:6381</monitor_addr>
     <monitor_index>0</monitor_index>
     <listen_addr>0.0.0.0:9999</listen_addr>
-  </db>
+  </server>
+  <leveldb>
+    <cache_size>1024</cache_size> <!-- in MB -->
+    <block_size>32</block_size> <!-- in KB -->
+    <write_buffer_size>64</write_buffer_size> <!--in MB -->
+    <max_open_files>500</max_open_files>
+  </leveldb>
 </config>

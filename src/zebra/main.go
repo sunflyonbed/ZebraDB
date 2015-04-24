@@ -26,13 +26,15 @@ func main() {
 	l4g.LoadConfiguration(gConf.Log.Config)
 	defer l4g.Close()
 
+	l4g.Debug("configure: %+v", *gConf)
+
 	var err error
-	gDB, err = NewLevelDB(gConf.DB.Path)
+	gDB, err = NewLevelDB(gConf.Server.Path)
 	if err != nil {
 		panic(err.Error())
 	}
 	defer gDB.Close()
-	go RedisServer(gConf.DB.ListenAddr)
-	l4g.Info("monitor redis info: %s %d", gConf.DB.MonitorAddr, gConf.DB.MonitorIndex)
-	RedisMonitor(gConf.DB.MonitorAddr, gConf.DB.MonitorIndex)
+	go RedisServer(gConf.Server.ListenAddr)
+	l4g.Info("monitor redis info: %s %d", gConf.Server.MonitorAddr, gConf.Server.MonitorIndex)
+	RedisMonitor(gConf.Server.MonitorAddr, gConf.Server.MonitorIndex)
 }

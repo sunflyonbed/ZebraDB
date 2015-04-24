@@ -40,6 +40,7 @@ var (
 	CMD_OP_SELECT = []byte("SELECT")
 	CMD_OP_INFO   = []byte("INFO")
 	CMD_OP_DUMP   = []byte("DUMP")
+	CMD_OP_SIZE   = []byte("SIZE")
 )
 
 func encodeHashKey(name, key []byte) []byte {
@@ -400,16 +401,30 @@ func (this *LevelDB) ZRange(data []byte) (retList [][]byte) {
 
 //COMMAND FUNCTION
 func (this *LevelDB) Dump(data []byte) error {
-	newDB, err := NewLevelDB(string(data))
+	options := levigo.NewOptions()
+	defer options.Close()
+
+	options.SetCreateIfMissing(true)
+	options.SetErrorIfExists(true)
+
+	options.SetWriteBufferSize(gConf.LevelDB.WriteBufferSize * 1024 * 1024)
+	options.SetCompression(levigo.SnappyCompression)
+
+	newDB, err := levigo.Open(string(data), options)
 	if err != nil {
 		return err
 	}
 	defer newDB.Close()
 
+	woptions := levigo.NewWriteOptions()
+	defer woptions.Close()
+
+	woptions.SetSync(false)
+
 	roptions := levigo.NewReadOptions()
-	roptions.SetVerifyChecksums(false)
-	roptions.SetFillCache(false)
 	defer roptions.Close()
+
+	roptions.SetFillCache(false)
 
 	it := this.NewIteratorWithReadOptions(roptions)
 	defer it.Close()
@@ -423,7 +438,7 @@ func (this *LevelDB) Dump(data []byte) error {
 		wb.Put(it.Key(), it.Value())
 		index++
 		if index == 10000 {
-			err := newDB.Write(wb)
+			err := newDB.Write(woptions, wb)
 			if err != nil {
 				l4g.Error("dump write batch error: %s", err.Error())
 				wb.Close()
@@ -434,7 +449,7 @@ func (this *LevelDB) Dump(data []byte) error {
 		}
 	}
 	if index > 0 {
-		err := newDB.Write(wb)
+		err := newDB.Write(woptions, wb)
 		if err != nil {
 			l4g.Error("dump write batch error: %s", err.Error())
 			wb.Close()
@@ -456,4 +471,16 @@ func (this *LevelDB) Info(key []byte) string {
 		return "valid key:\n\tnum-files-at-level<N>\n\tstats\n\tsstables\n"
 	}
 	return prop + "\n"
+}
+
+func (this *LevelDB) Size(data [][]byte) []uint64 {
+	rs := make([]levigo.Range, len(data)/2)
+	for index, v := range data {
+		if index%2 == 0 {
+			rs[index/2].Start = v
+		} else {
+			rs[index/2].Limit = v
+		}
+	}
+	return this.db.GetApproximateSizes(rs)
 }
