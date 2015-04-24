@@ -1,9 +1,13 @@
-ZebraDB监听redis中的dbq队列, 获取dbq中数据(redis部分写入指令的协议)并将其翻译为LevelDB格式保存
+ZebraDB监听redis中的dbq队列,将dbq中数据(redis部分写入指令的协议)翻译为LevelDB格式保存;
 
+* AIM
+>1. 替代redis提供的数据落地方式
+>2. 支持redis协议访问ZebraDB中数据
+* WHY
+>1. dump方式耗内存
+>2. aof恢复慢
 * Install: (directory: ZebraDB)
->1. ./all.bash
->2. mkdir log var
->3. 修改 start_zebra.sh stop_zebra.sh zebra_config.xml zebra_log.xml中的路径
+>./all.bash
 * Run: (directory: bin)
 >./start_zebra.sh (默认redis已启动)
 * Stop: (directory: bin)
