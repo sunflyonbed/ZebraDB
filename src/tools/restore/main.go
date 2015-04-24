@@ -35,7 +35,7 @@ func main() {
 		println("-s=redis select db number    default: -s=0")
 		return
 	}
-	println("***** database restore *****")
+	println("******       database restore          ******")
 	println(time.Now().String())
 	println("param: -l=", *leveldb)
 	println("param: -r=", *redisdb)
@@ -56,21 +56,13 @@ func main() {
 		}
 	}
 
-	//flush cache redis
-	println("****** start flush cache redis ******")
-	println(time.Now().String())
-	if reply := redisCs[0].Cmd("FLUSHDB"); reply.Err != nil {
-		panic(reply.Err.Error())
-	}
-	println("****** finish flush cache redis ******")
-
-	println("****** start ssdb sync cache redis ******")
+	println("******   start leveldb sync  redis     ******")
 	println(time.Now().String())
 	CopyLevelDBToRedis(*leveldb, redisCs)
-	println("****** finish ssdb sync cache redis ******")
+	println("******   finish leveldb sync redis     ******")
 
 	println(time.Now().String())
-	println("****** finish cahce sync save redis successful ******")
+	println("******   database restore  successful  ******")
 }
 
 func writeRedis(client *redis.Client, queue chan *redis.Requests, wg *sync.WaitGroup) {
@@ -112,6 +104,13 @@ func CopyLevelDBToRedis(dir string, clients [MAX_LINK]*redis.Client) {
 	ropt.SetFillCache(false)
 	it := db.NewIterator(ropt)
 	defer it.Close()
+
+	//flush redis
+	println("******   start flush redis   ******")
+	if reply := clients[0].Cmd("FLUSHDB"); reply.Err != nil {
+		panic(reply.Err.Error())
+	}
+	println("******   finish flush redis  ******")
 
 	hcount, scount, zcount, num, index := 0, 0, 0, 0, 0
 	var rs *redis.Requests
