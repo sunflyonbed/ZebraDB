@@ -1,9 +1,9 @@
 ZebraDB监听redis中的dbq队列,将dbq中数据(redis部分写入指令的协议)翻译为LevelDB格式保存;
 
-* AIM
+* Aim
 >1. 替代redis提供的数据落地方式
 >2. 支持redis协议访问ZebraDB中数据
-* WHY
+* Why
 >1. dump方式耗内存
 >2. aof恢复慢
 * Install: (directory: ZebraDB)
