@@ -40,7 +40,7 @@ func main() {
 	println(time.Now().String())
 	println("param: -l=", *leveldb)
 	println("param: -r=", *redisdb)
-	println("param: -s=", *selectdb)
+	println("param: -n=", *selectdb)
 
 	var redisCs [MAX_LINK]*redis.Client
 

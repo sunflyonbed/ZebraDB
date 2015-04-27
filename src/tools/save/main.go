@@ -11,9 +11,9 @@ import (
 
 var (
 	help     = flag.String("h", "false", "help")
-	levelDB  = flag.String("l", "ZebraDB_PATH/var", "leveldb data path")
-	redisDB  = flag.String("r", "127.0.0.1:6381", "redis ip:port")
-	selectDB = flag.String("n", "0", "redis select db number")
+	leveldb  = flag.String("l", "ZebraDB_PATH/var", "leveldb data path")
+	redisdb  = flag.String("r", "127.0.0.1:6381", "redis ip:port")
+	selectdb = flag.String("n", "0", "redis select db number")
 
 	gDB *LevelDB
 )
@@ -33,7 +33,11 @@ func main() {
 		return
 	}
 
-	if db, err := NewLevelDB(*levelDB); err != nil {
+	println("param: -l=", *leveldb)
+	println("param: -r=", *redisdb)
+	println("param: -n=", *selectdb)
+
+	if db, err := NewLevelDB(*leveldb); err != nil {
 		panic(err.Error())
 	} else {
 		gDB = db
@@ -41,11 +45,11 @@ func main() {
 
 	var redisCs [CONNECT_NUM]*redis.Client
 	for index := 0; index < CONNECT_NUM; index++ {
-		if client, err := redis.Dial("tcp", *redisDB); err != nil {
+		if client, err := redis.Dial("tcp", *redisdb); err != nil {
 			panic(err.Error())
 		} else {
 			redisCs[index] = client
-			reply := redisCs[index].Cmd("select", *selectDB)
+			reply := redisCs[index].Cmd("select", *selectdb)
 			if reply.Err != nil {
 				panic(reply.Err.Error())
 			}
