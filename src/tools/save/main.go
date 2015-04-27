@@ -42,6 +42,7 @@ func main() {
 	} else {
 		gDB = db
 	}
+	defer gDB.Close()
 
 	var redisCs [CONNECT_NUM]*redis.Client
 	for index := 0; index < CONNECT_NUM; index++ {
