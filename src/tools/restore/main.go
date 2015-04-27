@@ -17,10 +17,10 @@ const (
 )
 
 var (
-	leveldb  = flag.String("l", "/home/sj/ZebraDB/var", "leveldb data path")
-	redisdb  = flag.String("r", "127.0.0.1:6381", "redis ip:port")
-	selectdb = flag.Int("s", 0, "redis select db number")
 	help     = flag.String("h", "false", "help")
+	leveldb  = flag.String("l", "ZebraDB_PATH/var", "leveldb data path")
+	redisdb  = flag.String("r", "127.0.0.1:6381", "redis ip:port")
+	selectdb = flag.Int("n", 0, "redis select db number")
 )
 
 func main() {
@@ -30,11 +30,12 @@ func main() {
 
 	if *help == "true" {
 		println("restore help:")
-		println("-l=leveldb数据库文件路径     default: -l=/home/sj/ZebraDB/var")
+		println("-l=leveldb数据库文件路径     default: -l=ZebraDB_PATH/var")
 		println("-r=redis ip:port             default: -r=127.0.0.1:6381")
-		println("-s=redis select db number    default: -s=0")
+		println("-n=redis select db number    default: -n=0")
 		return
 	}
+
 	println("******       database restore          ******")
 	println(time.Now().String())
 	println("param: -l=", *leveldb)

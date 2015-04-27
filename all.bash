@@ -26,7 +26,7 @@ mv include ../
 
 cd ../../
 
-make && make redisprotocol && make restore
+make
 
 mkdir var log
 
@@ -36,3 +36,5 @@ sed -i "s,ZebraDB_PATH,${PWD}," bin/start_zebra.sh
 sed -i "s,ZebraDB_PATH,${PWD}," bin/stop_zebra.sh
 sed -i "s,ZebraDB_PATH,${PWD}," config/zebra_config.xml
 sed -i "s,ZebraDB_PATH,${PWD}," config/zebra_log.xml
+sed -i "s,ZebraDB_PATH,${PWD}," src/tools/save/main.go
+sed -i "s,ZebraDB_PATH,${PWD}," src/tools/restore/main.go

@@ -6,6 +6,7 @@ import (
 
 	l4g "log4go"
 
+	"common"
 	"levigo"
 )
 
@@ -43,91 +44,13 @@ var (
 	CMD_OP_SIZE   = []byte("SIZE")
 )
 
-func encodeHashKey(name, key []byte) []byte {
-	ret := make([]byte, 1+1+len(name)+1+len(key))
-	ret[0] = 'h'
-	ret[1] = byte(len(name))
-	copy(ret[2:], name)
-	ret[2+len(name)] = '='
-	copy(ret[3+len(name):], key)
-	return ret
-}
-
-func encodeSetKey(name, key []byte) []byte {
-	ret := make([]byte, 1+1+len(name)+1+len(key))
-	ret[0] = 's'
-	ret[1] = byte(len(name))
-	copy(ret[2:], name)
-	ret[2+len(name)] = '='
-	copy(ret[3+len(name):], key)
-	return ret
-}
-
-func encodeSortedSetKey(name, key []byte) []byte {
-	ret := make([]byte, 1+1+len(name)+1+len(key))
-	ret[0] = 'z'
-	ret[1] = byte(len(name))
-	copy(ret[2:], name)
-	ret[2+len(name)] = '='
-	copy(ret[3+len(name):], key)
-	return ret
-}
-
-func decodeHashKey(data []byte) (name, key []byte, ret bool) {
-	if len(data) < 5 {
-		return nil, nil, false
-	}
-	if data[0] != 'h' {
-		return nil, nil, false
-	}
-	nameLen := int(data[1])
-	if len(data)-4 < nameLen {
-		return nil, nil, false
-	}
-	name = data[2 : 2+nameLen]
-	key = data[3+nameLen:]
-	return name, key, true
-}
-
-func decodeSetKey(data []byte) (name, key []byte, ret bool) {
-	if len(data) < 5 {
-		return nil, nil, false
-	}
-	if data[0] != 's' {
-		return nil, nil, false
-	}
-	nameLen := int(data[1])
-	if len(data)-4 < nameLen {
-		return nil, nil, false
-	}
-	name = data[2 : 2+nameLen]
-	key = data[3+nameLen:]
-	return name, key, true
-}
-
-func decodeSortedSetKey(data []byte) (name, key []byte, ret bool) {
-	if len(data) < 5 {
-		return nil, nil, false
-	}
-	if data[0] != 'z' {
-		return nil, nil, false
-	}
-	nameLen := int(data[1])
-	if len(data)-4 < nameLen {
-		return nil, nil, false
-	}
-	name = data[2 : 2+nameLen]
-	key = data[3+nameLen:]
-	return name, key, true
-}
-
 //HASH FUNCTION
 func (this *LevelDB) HSet(data [][]byte) bool {
 	if len(data) != 3 {
 		l4g.Error("hset len error: %d", len(data))
 		return false
 	}
-	err := this.Put(encodeHashKey(data[0], data[1]), data[2])
+	err := this.Put(common.EncodeHashKey(data[0], data[1]), data[2])
 	if err != nil {
 		l4g.Error("hset %s %s %s write error: %s", data[0], data[1], data[2], err.Error())
 		return false
@@ -149,7 +72,7 @@ func (this *LevelDB) HMSet(data [][]byte) bool {
 
 	wb := levigo.NewWriteBatch()
 	for i := 0; i < pairs; i++ {
-		wb.Put(encodeHashKey(data[0], data[1+2*i]), data[2+2*i])
+		wb.Put(common.EncodeHashKey(data[0], data[1+2*i]), data[2+2*i])
 	}
 	err := this.Write(wb)
 	wb.Close()
@@ -174,7 +97,7 @@ func (this *LevelDB) HDel(data [][]byte) bool {
 
 	wb := levigo.NewWriteBatch()
 	for i := 1; i < dl; i++ {
-		wb.Delete(encodeHashKey(data[0], data[i]))
+		wb.Delete(common.EncodeHashKey(data[0], data[i]))
 	}
 	err := this.Write(wb)
 	wb.Close()
@@ -199,9 +122,9 @@ func (this *LevelDB) HClear(data [][]byte) bool {
 func (this *LevelDB) HKeys(data []byte) (retList [][]byte) {
 	it := this.NewIterator()
 	defer it.Close()
-	start := encodeHashKey(data, []byte(nil))
+	start := common.EncodeHashKey(data, []byte(nil))
 	for it.Seek(start); it.Valid(); it.Next() {
-		name, key, ret := decodeHashKey(it.Key())
+		name, key, ret := common.DecodeHashKey(it.Key())
 		if ret {
 			if string(name) == string(data) {
 				retList = append(retList, key)
@@ -223,9 +146,9 @@ func (this *LevelDB) HKeys(data []byte) (retList [][]byte) {
 func (this *LevelDB) HGetAll(data []byte) (retList [][]byte) {
 	it := this.NewIterator()
 	defer it.Close()
-	start := encodeHashKey(data, []byte(nil))
+	start := common.EncodeHashKey(data, []byte(nil))
 	for it.Seek(start); it.Valid(); it.Next() {
-		name, key, ret := decodeHashKey(it.Key())
+		name, key, ret := common.DecodeHashKey(it.Key())
 		if ret {
 			if string(name) == string(data) {
 				retList = append(retList, key)
@@ -247,7 +170,7 @@ func (this *LevelDB) HGetAll(data []byte) (retList [][]byte) {
 
 func (this *LevelDB) HMGet(data [][]byte) (retList [][]byte) {
 	for _, v := range data[1:] {
-		value, err := this.Get(encodeHashKey(data[0], v))
+		value, err := this.Get(common.EncodeHashKey(data[0], v))
 		if err != nil {
 			retList = nil
 			retList = append(retList, []byte(err.Error()))
@@ -269,7 +192,7 @@ func (this *LevelDB) SAdd(data [][]byte) bool {
 
 	wb := levigo.NewWriteBatch()
 	for i := 1; i < dl; i++ {
-		wb.Put(encodeSetKey(data[0], data[i]), nil)
+		wb.Put(common.EncodeSetKey(data[0], data[i]), nil)
 	}
 	err := this.Write(wb)
 	wb.Close()
@@ -290,7 +213,7 @@ func (this *LevelDB) SRem(data [][]byte) bool {
 
 	wb := levigo.NewWriteBatch()
 	for i := 1; i < dl; i++ {
-		wb.Delete(encodeSetKey(data[0], data[i]))
+		wb.Delete(common.EncodeSetKey(data[0], data[i]))
 	}
 	err := this.Write(wb)
 	wb.Close()
@@ -305,9 +228,9 @@ func (this *LevelDB) SRem(data [][]byte) bool {
 func (this *LevelDB) SMembers(data []byte) (retList [][]byte) {
 	it := this.NewIterator()
 	defer it.Close()
-	start := encodeSetKey(data, []byte(nil))
+	start := common.EncodeSetKey(data, []byte(nil))
 	for it.Seek(start); it.Valid(); it.Next() {
-		name, key, ret := decodeSetKey(it.Key())
+		name, key, ret := common.DecodeSetKey(it.Key())
 		if ret {
 			if string(name) == string(data) {
 				retList = append(retList, key)
@@ -341,7 +264,7 @@ func (this *LevelDB) ZAdd(data [][]byte) bool {
 
 	wb := levigo.NewWriteBatch()
 	for i := 0; i < pairs; i++ {
-		wb.Put(encodeSortedSetKey(data[0], data[2+2*i]), data[1+2*i])
+		wb.Put(common.EncodeSortedSetKey(data[0], data[2+2*i]), data[1+2*i])
 	}
 	err := this.Write(wb)
 	wb.Close()
@@ -362,7 +285,7 @@ func (this *LevelDB) ZRem(data [][]byte) bool {
 
 	wb := levigo.NewWriteBatch()
 	for i := 1; i < dl; i++ {
-		wb.Delete(encodeSortedSetKey(data[0], data[i]))
+		wb.Delete(common.EncodeSortedSetKey(data[0], data[i]))
 	}
 	err := this.Write(wb)
 	wb.Close()
@@ -377,9 +300,9 @@ func (this *LevelDB) ZRem(data [][]byte) bool {
 func (this *LevelDB) ZRange(data []byte) (retList [][]byte) {
 	it := this.NewIterator()
 	defer it.Close()
-	start := encodeSortedSetKey(data, []byte(nil))
+	start := common.EncodeSortedSetKey(data, []byte(nil))
 	for it.Seek(start); it.Valid(); it.Next() {
-		name, key, ret := decodeSortedSetKey(it.Key())
+		name, key, ret := common.DecodeSortedSetKey(it.Key())
 		if ret {
 			if string(name) == string(data) {
 				retList = append(retList, key)
