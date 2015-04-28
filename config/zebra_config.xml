@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
-  <!--服务器ID，由数据中心分配 -->
   <log>
     <config>ZebraDB_PATH/config/zebra_log.xml</config>
   </log>
