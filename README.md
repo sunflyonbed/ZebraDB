@@ -9,7 +9,7 @@
 ```
 ./all.bash
 ```
-####Run: (directory: bin,默认redis已启动)
+####Run: (directory: bin; 默认redis已启动,监听6381端口)
 ```
  ./start_zebra.sh 
 ```
@@ -41,4 +41,4 @@ redis-cli -p 9999
 | HSET       |           |            |        |
 | HMSET      |           |            |        |
 | HDEL       |           |            |        |
-| DEL        |           |            |        |  
+| DEL        |           |            |        |
