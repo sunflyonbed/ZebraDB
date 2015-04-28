@@ -1,4 +1,4 @@
-[ZebraDB - Redis数据保存服务](https://bitbucket.org/ivanzt/zebradb)
+[ZebraDB - Redis数据存储服务](https://bitbucket.org/ivanzt/zebradb)
 ===========================
 
 ####Why
