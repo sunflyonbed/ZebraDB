@@ -33,24 +33,12 @@ redis-cli -p 9999
 ```
 ###ZebraDB支持的Redis指令
 
-####HASH
-```
-HGETALL  HKEYS HMGET HSET  HMSET
-HDEL DEL
-```
-####SET
-```
-SMEMBERS SADD
-SREM
-```
-####SORTEDSET
-```
-ZRANGE ZADD
-ZREM
-```
-####SERVER
-```
-DUMP
-INFO
-SIZE
-```
+| HASH       | SET       | SORTEDSET  | SERVER |
+| --------   | --------- | ---------  | ------ |
+| HGETALL    | SMEMBERS  | ZRANGE     | DUMP   |
+| HKEYS      | SADD      | ZADD       | INFO   |
+| HMGET      | SREM      | ZREM       | SIZE   |
+| HSET       |           |            |        |
+| HMSET      |           |            |        |
+| HDEL       |           |            |        |
+| DEL        |           |            |        |  
