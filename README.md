@@ -31,7 +31,7 @@
 ```
 redis-cli -p 9999
 ```
-###ZebraDB支持的Redis指令
+###ZebraDB支持Redis协议操作
 
 | HASH       | SET       | SORTEDSET  | SERVER |
 | --------   | --------- | ---------  | ------ |
