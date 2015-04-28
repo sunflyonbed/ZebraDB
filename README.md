@@ -11,7 +11,7 @@
 ```
 ####Run: (directory: bin; 默认redis已启动,监听6381端口)
 ```
- ./start_zebra.sh 
+./start_zebra.sh 
 ```
 ####Stop: (directory: bin)
 ```
