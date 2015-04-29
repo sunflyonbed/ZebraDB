@@ -68,7 +68,7 @@ func RedisMonitor(addr string, index int) {
 		rLen, rErr := WriteLevelDBInRange(client, &buff, MAX_LRANGE_INDEX, &opNum, &opStat)
 		if rErr != nil {
 			return
-		} else if rLen == 0 {
+		} else if rLen < MAX_LRANGE_INDEX {
 			if count < MAX_SLEEP_TIME {
 				count += MAX_SLEEP_INC_INTERVAL
 			}
