@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	MAX_LRANGE_INDEX       = 10000
-	MAX_SLEEP_TIME         = 250
+	MAX_LRANGE_INDEX       = 1500
+	MAX_SLEEP_TIME         = 100
 	MAX_SLEEP_INC_INTERVAL = 10
 )
 
