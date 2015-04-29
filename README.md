@@ -1,4 +1,4 @@
-[ZebraDB - Redis数据保存服务](https://bitbucket.org/ivanzt/zebradb)
+[ZebraDB - Redis数据存储服务](https://bitbucket.org/ivanzt/zebradb)
 ===========================
 
 ####Why
@@ -11,7 +11,7 @@
 ```
 ####Run: (directory: bin; 默认redis已启动,监听6381端口)
 ```
- ./start_zebra.sh 
+./start_zebra.sh 
 ```
 ####Stop: (directory: bin)
 ```
@@ -31,7 +31,7 @@
 ```
 redis-cli -p 9999
 ```
-###ZebraDB支持的Redis指令
+###ZebraDB支持的Redis协议操作
 
 | HASH       | SET       | SORTEDSET  | SERVER |
 | --------   | --------- | ---------  | ------ |
