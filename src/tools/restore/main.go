@@ -19,7 +19,7 @@ const (
 var (
 	help     = flag.String("h", "false", "help")
 	leveldb  = flag.String("l", "ZebraDB_PATH/var", "leveldb data path")
-	redisdb  = flag.String("r", "127.0.0.1:6381", "redis ip:port")
+	redisdb  = flag.String("r", "127.0.0.1:9898", "redis ip:port")
 	selectdb = flag.Int("n", 0, "redis db number")
 )
 
@@ -31,7 +31,7 @@ func main() {
 	if *help == "true" {
 		println("restore leveldb data to redis, help:")
 		println("-l=leveldb数据库文件路径     default: -l=ZebraDB_PATH/var")
-		println("-r=redis ip:port             default: -r=127.0.0.1:6381")
+		println("-r=redis ip:port             default: -r=127.0.0.1:9898")
 		println("-n=redis db number           default: -n=0")
 		return
 	}
@@ -156,13 +156,13 @@ func CopyLevelDBToRedis(dir string, clients [MAX_LINK]*redis.Client) {
 			num = 0
 		}
 
-		if hcount%1000000 == 0 {
+		if hcount > 0 && hcount%1000000 == 0 {
 			println("leveldb hash field:      ", hcount)
 		}
-		if scount%10000000 == 0 {
+		if scount > 0 && scount%10000000 == 0 {
 			println("leveldb set field:       ", scount)
 		}
-		if zcount%10000000 == 0 {
+		if zcount > 0 && zcount%10000000 == 0 {
 			println("leveldb sortedset field: ", zcount)
 		}
 	}

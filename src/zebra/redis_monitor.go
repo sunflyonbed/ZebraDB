@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -16,8 +17,8 @@ import (
 
 const (
 	MAX_LRANGE_INDEX       = 10000
-	MAX_SLEEP_TIME         = 222
-	MAX_SLEEP_INC_INTERVAL = 1
+	MAX_SLEEP_TIME         = 250
+	MAX_SLEEP_INC_INTERVAL = 10
 )
 
 func RedisMonitor(addr string, index int) {
@@ -86,7 +87,11 @@ func WriteLevelDBInRange(client *redis.Client, buff *bytes.Buffer, r int, opNum,
 			return 0, nil
 		} else {
 			for _, info := range lr {
-				WriteLevelDB(buff, info, opNum, opStat)
+				err := WriteLevelDB(buff, info, opNum, opStat)
+				if err != nil {
+					l4g.Error(err.Error())
+					return 0, err
+				}
 			}
 			reply := client.Cmd("LTRIM", "dbq", lrLen, -1)
 			if reply.Err != nil {
@@ -102,7 +107,7 @@ func WriteLevelDBInRange(client *redis.Client, buff *bytes.Buffer, r int, opNum,
 	}
 }
 
-func WriteLevelDB(buff *bytes.Buffer, info []byte, opNum, opStat *uint64) {
+func WriteLevelDB(buff *bytes.Buffer, info []byte, opNum, opStat *uint64) error {
 	atomic.AddUint64(opNum, 1)
 	buff.Write(info)
 	for buff.Len() > 0 {
@@ -132,12 +137,14 @@ func WriteLevelDB(buff *bytes.Buffer, info []byte, opNum, opStat *uint64) {
 		} else if bytes.Equal(infos[0], REDIS_OP_ZREM) {
 			ret = gDB.ZRem(infos[1:])
 		} else {
-			l4g.Error("no found cmd %s", infos[0])
+			return errors.New(fmt.Sprintf("no found cmd %s", infos[0]))
 		}
 		if !ret {
 			l4g.Error("op failed: %v", infos)
 			l4g.Error("op failed eary read: %q", infos)
+			return errors.New("op failed")
 		}
 		atomic.AddUint64(opStat, 1)
 	}
+	return nil
 }
