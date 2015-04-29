@@ -230,6 +230,10 @@ typedef long long mstime_t; /* millisecond time type. */
 #define REDIS_AOF_ON 1              /* AOF is on */
 #define REDIS_AOF_WAIT_REWRITE 2    /* AOF waits rewrite to start appending */
 
+/* leveldb states */
+#define REDIS_LEVELDB_OFF 0             /* LEVELDB is off */
+#define REDIS_LEVELDB_ON 1              /* LEVELDB is on */
+
 /* Client flags */
 #define REDIS_SLAVE (1<<0)   /* This client is a slave server */
 #define REDIS_MASTER (1<<1)  /* This client is a master server */
@@ -836,6 +840,9 @@ struct redisServer {
     int assert_line;
     int bug_report_start; /* True if bug report header was already logged. */
     int watchdog_period;  /* Software watchdog period in ms. 0 = off */
+
+    int leveldb_state;   
+    char *leveldb_path; 
 };
 
 typedef struct pubsubPattern {
@@ -1111,6 +1118,8 @@ void backgroundRewriteDoneHandler(int exitcode, int bysignal);
 void aofRewriteBufferReset(void);
 unsigned long aofRewriteBufferSize(void);
 
+int loadLevelDB(char *path);
+
 /* Sorted sets data type */
 
 /* Struct to hold a inclusive/exclusive range spec by score comparison. */
@@ -1246,6 +1255,8 @@ void signalFlushedDb(int dbid);
 unsigned int GetKeysInSlot(unsigned int hashslot, robj **keys, unsigned int count);
 void scanGenericCommand(redisClient *c, robj *o, unsigned long cursor);
 int parseScanCursorOrReply(redisClient *c, robj *o, unsigned long *cursor);
+
+void zebraRPush(redisDb *db, struct redisCommand *cmd, robj **argv, int argc);
 
 /* API to get key arguments from commands */
 #define REDIS_GETKEYS_ALL 0

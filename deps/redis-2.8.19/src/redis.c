@@ -1453,6 +1453,8 @@ void initServerConfig(void) {
     server.assert_line = 0;
     server.bug_report_start = 0;
     server.watchdog_period = 0;
+    server.leveldb_state = REDIS_LEVELDB_OFF;
+    server.leveldb_path = NULL;
 }
 
 /* This function will try to raise the max number of open files accordingly to
@@ -2010,6 +2012,8 @@ void call(redisClient *c, int flags) {
         }
         redisOpArrayFree(&server.also_propagate);
     }
+    if(dirty)
+      zebraRPush(c->db,c->cmd,c->argv,c->argc);
     server.stat_numcommands++;
 }
 
@@ -3244,6 +3248,9 @@ void loadDataFromDisk(void) {
     if (server.aof_state == REDIS_AOF_ON) {
         if (loadAppendOnlyFile(server.aof_filename) == REDIS_OK)
             redisLog(REDIS_NOTICE,"DB loaded from append only file: %.3f seconds",(float)(ustime()-start)/1000000);
+    } else if (server.leveldb_state == REDIS_LEVELDB_ON) {
+        if (loadLevelDB(server.leveldb_path) == REDIS_OK)
+            redisLog(REDIS_NOTICE,"DB loaded from leveldb: %.3f seconds",(float)(ustime()-start)/1000000);
     } else {
         if (rdbLoad(server.rdb_filename) == REDIS_OK) {
             redisLog(REDIS_NOTICE,"DB loaded from disk: %.3f seconds",
