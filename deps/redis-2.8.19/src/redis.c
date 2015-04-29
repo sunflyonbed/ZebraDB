@@ -1455,6 +1455,7 @@ void initServerConfig(void) {
     server.watchdog_period = 0;
     server.leveldb_state = REDIS_LEVELDB_OFF;
     server.leveldb_path = NULL;
+    server.leveldb_dirty = 0;
 }
 
 /* This function will try to raise the max number of open files accordingly to
@@ -2581,6 +2582,8 @@ sds genRedisInfoString(char *section) {
         if (sections++) info = sdscat(info,"\r\n");
         info = sdscatprintf(info,
             "# Persistence\r\n"
+            "zebra:%llu\r\n"
+            "zebra_time:%jd\r\n"
             "loading:%d\r\n"
             "rdb_changes_since_last_save:%lld\r\n"
             "rdb_bgsave_in_progress:%d\r\n"
@@ -2595,6 +2598,8 @@ sds genRedisInfoString(char *section) {
             "aof_current_rewrite_time_sec:%jd\r\n"
             "aof_last_bgrewrite_status:%s\r\n"
             "aof_last_write_status:%s\r\n",
+            server.leveldb_dirty,
+            time(NULL),
             server.loading,
             server.dirty,
             server.rdb_child_pid != -1,

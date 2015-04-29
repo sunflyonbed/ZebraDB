@@ -32,6 +32,7 @@ void zebraRPush(redisDb *db, struct redisCommand *cmd, robj **argv, int argc) {
 
   decrRefCount(dbq);
   decrRefCount(info);
+  server.leveldb_dirty++;
 }
 
 int loadLevelDB(char *path) {
