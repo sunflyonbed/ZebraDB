@@ -5,17 +5,21 @@
 1. dump耗内存
 2. aof恢复慢
 
-####Install: (directory: ZebraDB)
+####Install
 ```
 ./all.bash
 ```
-####Run: (directory: bin; 默认redis已启动,监听6381端口)
+####Run Redis
 ```
-./start_zebra.sh 
+./deps/redis-2.8.19/src/redis-server ./deps/redis-2.8.19/redis.conf
 ```
-####Stop: (directory: bin)
+####Run Zebra
 ```
-./stop_zebra.sh
+./bin/start_zebra.sh 
+```
+####Stop Zebra
+```
+./bin/stop_zebra.sh
 ```
 ###ZebraDB支持的Redis协议操作
 
