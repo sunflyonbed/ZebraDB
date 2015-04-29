@@ -3,6 +3,8 @@
 SNAPPY="snappy-1.1.1"
 LEVELDB="leveldb-1.18"
 
+DIR=`pwd`
+
 rm -rf deps/include deps/libs deps/${SNAPPY} deps/${LEVELDB} || exit 1
 
 cd deps/ && mkdir libs 
@@ -20,9 +22,16 @@ export CPLUS_INCLUDE_PATH=${SNAPPY_PATH}
 
 cd ../
 
-tar -zxf ${LEVELDB}.tar.gz && cd ${LEVELDB} && make || exit 1
+tar -zxf ${LEVELDB}.tar.gz && cd ${LEVELDB} &&  make || exit 1
 cp libleveldb.a ../libs
 mv include ../
+
+cd ../redis-2.8.19 
+
+sed -i "s,ZebraDB_PATH,${DIR},g" src/Makefile 
+sed -i "s,ZebraDB_PATH,${DIR}," redis.conf 
+
+make || exit 1
 
 cd ../../
 
@@ -30,11 +39,9 @@ make
 
 mkdir var log
 
-PWD=`pwd`
-
-sed -i "s,ZebraDB_PATH,${PWD}," bin/start_zebra.sh
-sed -i "s,ZebraDB_PATH,${PWD}," bin/stop_zebra.sh
-sed -i "s,ZebraDB_PATH,${PWD}," config/zebra_config.xml
-sed -i "s,ZebraDB_PATH,${PWD}," config/zebra_log.xml
-sed -i "s,ZebraDB_PATH,${PWD}," src/tools/save/main.go
-sed -i "s,ZebraDB_PATH,${PWD}," src/tools/restore/main.go
+sed -i "s,ZebraDB_PATH,${DIR}," bin/start_zebra.sh
+sed -i "s,ZebraDB_PATH,${DIR}," bin/stop_zebra.sh
+sed -i "s,ZebraDB_PATH,${DIR}," config/zebra_config.xml
+sed -i "s,ZebraDB_PATH,${DIR}," config/zebra_log.xml
+sed -i "s,ZebraDB_PATH,${DIR}," src/tools/save/main.go
+sed -i "s,ZebraDB_PATH,${DIR}," src/tools/restore/main.go
