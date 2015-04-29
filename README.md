@@ -17,20 +17,6 @@
 ```
 ./stop_zebra.sh
 ```
-####Tools: (directory: bin)
-```
-./save -h=true
-```
-```
-./restore -h=true
-```
-####Test: (directory: bin)
-```
-./redisprotocol -i="HSET T a 1" | redis-cli -p 6381 -n 0 --pipe
-```
-```
-redis-cli -p 9999
-```
 ###ZebraDB支持的Redis协议操作
 
 | HASH       | SET       | SORTEDSET  | SERVER |
