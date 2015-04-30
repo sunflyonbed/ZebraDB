@@ -1,4 +1,4 @@
-[ZebraDB - 基于LevelDB存储数据的Redis服务](https://bitbucket.org/ivanzt/zebradb)
+[ZebraDB-基于LevelDB存储数据的Redis服务](https://github.com/ivanabc/ZebraDB)
 ===========================
 
 ####Why
@@ -9,7 +9,7 @@
 ```
 ./all.bash
 ```
-####Run Redis
+####Run Redis (关闭redis需要检查队列长度)
 ```
 ./deps/redis-2.8.19/src/redis-server ./deps/redis-2.8.19/redis.conf
 ```
