@@ -120,24 +120,27 @@ func WriteLevelDB(buff *bytes.Buffer, info []byte, opNum, opStat *uint64) error 
 		ret := true
 		if len(infos) < 2 {
 			ret = false
-		} else if bytes.Equal(infos[0], REDIS_OP_HSET) {
-			ret = gDB.HSet(infos[1:])
-		} else if bytes.Equal(infos[0], REDIS_OP_HMSET) {
-			ret = gDB.HMSet(infos[1:])
-		} else if bytes.Equal(infos[0], REDIS_OP_HDEL) {
-			ret = gDB.HDel(infos[1:])
-		} else if bytes.Equal(infos[0], REDIS_OP_DEL) {
-			ret = gDB.HClear(infos[1:])
-		} else if bytes.Equal(infos[0], REDIS_OP_SADD) {
-			ret = gDB.SAdd(infos[1:])
-		} else if bytes.Equal(infos[0], REDIS_OP_SREM) {
-			ret = gDB.SRem(infos[1:])
-		} else if bytes.Equal(infos[0], REDIS_OP_ZADD) {
-			ret = gDB.ZAdd(infos[1:])
-		} else if bytes.Equal(infos[0], REDIS_OP_ZREM) {
-			ret = gDB.ZRem(infos[1:])
 		} else {
-			return errors.New(fmt.Sprintf("no found cmd %s", infos[0]))
+			op := bytes.ToUpper(infos[0])
+			if bytes.Equal(op, REDIS_OP_HSET) {
+				ret = gDB.HSet(infos[1:])
+			} else if bytes.Equal(op, REDIS_OP_HMSET) {
+				ret = gDB.HMSet(infos[1:])
+			} else if bytes.Equal(op, REDIS_OP_HDEL) {
+				ret = gDB.HDel(infos[1:])
+			} else if bytes.Equal(op, REDIS_OP_DEL) {
+				ret = gDB.HClear(infos[1:])
+			} else if bytes.Equal(op, REDIS_OP_SADD) {
+				ret = gDB.SAdd(infos[1:])
+			} else if bytes.Equal(op, REDIS_OP_SREM) {
+				ret = gDB.SRem(infos[1:])
+			} else if bytes.Equal(op, REDIS_OP_ZADD) {
+				ret = gDB.ZAdd(infos[1:])
+			} else if bytes.Equal(op, REDIS_OP_ZREM) {
+				ret = gDB.ZRem(infos[1:])
+			} else {
+				return errors.New(fmt.Sprintf("no found cmd %s", op))
+			}
 		}
 		if !ret {
 			l4g.Error("op failed: %v", infos)
